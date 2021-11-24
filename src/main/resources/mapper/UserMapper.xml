@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.neusoft.springspringmvcmybatis.dao.UserMapper">
+
+    <!--public List<T> queryMsgAll() throws Exception;-->
+    <select id="queryMsgAll" resultType="user">
+      select * from elm_user
+    </select>
+    <!--public List<T> queryMsgByMap(Map<String,Object> map) throws Exception;-->
+    <select id="queryMsgByMap" resultType="user" parameterType="map">
+        select * from (select e.*,rownum rn from elm_user e
+        <where>
+            <if test="username!=null and username!=''">
+                and username like concat(concat('%',#{username}),'%')
+            </if>
+            <if test="sex!=null and sex!=''">
+                and usersex = #{sex}
+            </if>
+            and rownum &lt;=(#{pageNum}*#{pageSize})) s
+        </where>
+        where s.rn>(#{pageNum}-1)*#{pageSize}
+    </select>
+
+    <!--public int queryMsgByMapCount(Map<String,Object> map) throws Exception;-->
+    <select id="queryMsgByMapCount" resultType="int" parameterType="map">
+        select count(1) from elm_user
+        <where>
+            <if test="username!=null and username!=''">
+                and username like concat(concat('%',#{username}),'%')
+            </if>
+            <if test="sex!=null and sex!=''">
+                and usersex = #{sex}
+            </if>
+        </where>
+    </select>
+
+    <!--public int deleteMsg(Integer[] ids) throws Exception;-->
+    <delete id="deleteMsg">
+        delete elm_user where userId in
+        <foreach collection="array" open="(" close=")" separator="," item="id">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

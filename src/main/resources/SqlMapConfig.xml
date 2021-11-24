@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-config.dtd">
+
+<configuration>
+    <!--&lt;!&ndash;开启二级缓存  cacheEnabled 默认为false&ndash;&gt;-->
+    <!--<settings>-->
+        <!--<setting name="" value="true"/>-->
+    <!--</settings>-->
+
+    <!--
+        配置映射文件，可配置多个
+        一个接口对应一个xml文件:配置sql映射及sql语句
+    -->
+    <!--<mappers>-->
+        <!--&lt;!&ndash;批量注册mapper.xml&ndash;&gt;-->
+        <!--<package name="com.neusoft.springmybatis.dao"></package>-->
+    <!--</mappers>-->
+</configuration>

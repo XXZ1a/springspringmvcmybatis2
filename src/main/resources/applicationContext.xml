@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/aop
+        http://www.springframework.org/schema/aop/spring-aop.xsd
+        http://www.springframework.org/schema/tx
+        http://www.springframework.org/schema/tx/spring-tx.xsd">
+
+    <!--①配置扫描的组件-->
+    <context:component-scan base-package="com.neusoft.springspringmvcmybatis.service.impl"/>
+    <context:component-scan base-package="com.neusoft.springspringmvcmybatis.vo"/>
+    <!--②加载db.properties-->
+    <context:property-placeholder location="classpath:db.properties"/>
+    <!--
+        ③配置数据源
+            class:配置数据库连接池
+            org.springframework.jdbc.datasource.DriverManagerDataSource     spring自带的数据库连接池
+            com.alibaba.druid.pool.DruidDataSource      druid数据库连接池
+    -->
+    <bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource" init-method="init" destroy-method="close">
+        <property name="driverClassName" value="${oracle_driver}"/>
+        <property name="url" value="${oracle_url}"/>
+        <property name="username" value="${oracle_username}"/>
+        <property name="password" value="${oracle_password}"/>
+    </bean>
+
+    <!--④配置SqlSessionFactory-->
+    <!--创建SqlSessionFactory,并配置实体对象名-->
+    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="dataSource"></property>
+        <property name="typeAliasesPackage" value="com.neusoft.springspringmvcmybatis.pojo"></property>
+        <!--spring核心配置文件加载时加载mybatis核心配置文件-->
+        <!--<property name="configLocation" value="classpath:SqlMapConfig.xml"></property>-->
+        <!--
+            mapperLocations:加载指定路径下的mapper.xml文件
+        -->
+        <property name="mapperLocations">
+            <value>classpath*:mapper/*.xml</value>
+        </property>
+    </bean>
+
+    <!--⑤扫描包,为该包的所有接口生成代理对象,并管理进spring容器,如果需要扫描多个包中间用逗号隔开-->
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <!--扫描包,为该包的所有接口生成代理对象,如果需要扫描多个包中间用逗号隔开-->
+        <!--
+            代理对象这个时候就交给了spring管理
+            将该包下的mapper.xml文件加载进内存
+        -->
+        <property name="basePackage" value="com.neusoft.springspringmvcmybatis.dao"></property>
+        <property name="sqlSessionFactoryBeanName" value="sqlSessionFactory"></property>
+    </bean>
+
+    <!--⑥配置Spring容器提供的事务管理器-->
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"></property>
+    </bean>
+    <!--开启注解事务  注解配置事务管理-->
+    <!--<tx:annotation-driven transaction-manager="transactionManager"/>-->
+    <!--<context:component-scan base-package="com.neusoft.springspringmvcmybatis.service.impl"/>-->
+    <!--xml配置事务管理-->
+    <!--第二步:配置通知管理器-->
+    <tx:advice id="txAdvice" transaction-manager="transactionManager">
+        <!--第三步:通知的方法   配置事务的属性-->
+        <tx:attributes>
+            <!--<tx:method name="delete*" propagation="REQUIRED"/>-->
+            <!--<tx:method name="remove*" propagation="REQUIRED"/>-->
+            <!--<tx:method name="update*" propagation="REQUIRED"/>-->
+            <!--<tx:method name="add*" propagation="REQUIRED"/>-->
+            <!--<tx:method name="insert*" propagation="REQUIRED"/>-->
+            <!--<tx:method name="transfer*" propagation="REQUIRED"/>-->
+            <!--其他的方法都是在事务中运行-->
+            <tx:method name="*" propagation="REQUIRED"/>
+            <!--非事务运行-->
+            <tx:method name="query*" propagation="SUPPORTS"/>
+            <tx:method name="select*" propagation="SUPPORTS"/>
+            <tx:method name="get*" propagation="SUPPORTS"/>
+            <tx:method name="find*" propagation="SUPPORTS"/>
+        </tx:attributes>
+    </tx:advice>
+    <!--第四步:配置切面-->
+    <aop:config>
+        <!--配置切入点-->
+        <aop:pointcut id="pt1" expression="execution(* com.neusoft.springspringmvcmybatis.service.impl.*.*(..))"></aop:pointcut>
+        <!--配置通知-->
+        <aop:advisor advice-ref="txAdvice" pointcut-ref="pt1"></aop:advisor>
+    </aop:config>
+</beans>
